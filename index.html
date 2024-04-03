@@ -1,15 +1,76 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <title>Presupuesto de gasto semanal</title>
+    <script src="./js/index.js"></script>
+    <link rel="stylesheet" href="./style/style.css">
 </head>
-<body>
-    <header>
-        <h1>GESTOR DE GASTOS</h1>
-    </header>
-    <script src= "./js/index.js">  
-    </script>
+
+<body onload= "actualizarVista()"> 
+    <div class="contenedor">
+        <header>
+            <h1>Gasto Semanal</h1>
+            <div class="contenido-principal contenido">
+                <div class="row">
+                    <div id="pregunta">
+                        <h2>Coloca tu presupuesto</h2>
+                        <div id="msj_error_pregunta"></div>
+                        <form>
+                            <input 
+                            type="number" 
+                            id="presupuestoInicial" 
+                            class="u-full-width"
+                            placeholder="Coloca tu presupuesto" />
+                            <input 
+                            type="button" 
+                            onclick="guardarPresupuesto()" 
+                            class="button-primary u-full-width"
+                            value="Crear Presupusto" />
+                        </form>
+                    </div>
+                    <div id="divGastos">
+                        <div class="one-half column">
+
+                            <div id="divCrearGastos">
+                                <form id="formGastos">
+                                    <h2>Agrega tus gastos aqui</h2>
+                                    <div id="msj_error_crearGastos"></div>
+                                    <div class="campo">
+                                        <label>Nombre Gastos</label>
+                                        <input 
+                                        type="text" 
+                                        class="u-full-width" 
+                                        placeholder="Ej. Transporte"
+                                        id="tipoGastos" />
+                                    </div>
+                                    <div class="campo">
+                                        <label>Cantidad Gastos</label>
+                                        <input 
+                                        type="number" 
+                                        class="u-full-width" 
+                                        placeholder="Ej. 300"
+                                        id="cantidadGastos" />
+                                    </div>
+                                    <input 
+                                    type="button" 
+                                    onclick="agregarGastos()" 
+                                    class="button-primary u-full-width"
+                                    value="Agregar Gastos" />
+                                </form>
+                            </div>
+                        </div>
+                        <div class="one-half column" id="divControlGastos">
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </header>
+    </div>
+
+
 </body>
+
 </html>

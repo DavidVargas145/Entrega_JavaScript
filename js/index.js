@@ -1,111 +1,128 @@
-// Función para obtener el nombre del usuario
-function obtenerNombreUsuario() {
-    let nombre = prompt("¡Bienvenido al Gestor de Gastos!\nPor favor, ingresa tu nombre:");
-    if (nombre === null || nombre.trim() === "") {
-        return "Invitado";
+let restante = 0;
+
+const guardarPresupuesto = () => {
+    let presupuesto = parseInt(document.querySelector("#presupuestoInicial").value);
+    if (presupuesto < 1 || isNaN(presupuesto)) {
+        mostrarError("#msj_error_pregunta", "CANTIDAD NO VALIDA");
+        return;
+    }
+
+    localStorage.setItem("presupuesto", presupuesto);
+    localStorage.setItem("gastos", JSON.stringify([]));
+    actualizarVista();
+}
+
+const actualizarVista=()=> {
+    let presupuesto = localStorage.getItem("presupuesto");
+    restante = presupuesto;
+
+
+    let divPregunta = document.querySelector("#pregunta");
+    let divGastos = document.querySelector("#divGastos");
+    let divControlGastos = document.querySelector("#divControlGastos");
+    divPregunta.style.display = "none"
+    divGastos.style.display = "none"
+
+    let controlGastos = `<div class="gastos-realizados">
+                                <h2>Listado de Gastos</h2> 
+                                <div class="alert alert-primary">              
+                                presupuesto: $ ${presupuesto}</div> 
+                                <div class="alert alert-succes">
+                                restante: $ ${presupuesto} </div>  
+                        </div>`;
+
+    if (!presupuesto) {
+        divPregunta.style.display = "block";
     } else {
-        return nombre.trim();
+        divPregunta.style.display = "none";
+        divGastos.style.display = "block";
+        divControlGastos.innerHTML = controlGastos;
+        refrescarListado();
     }
 }
 
-// Función para mostrar el menú de opciones
-function mostrarMenu() {
-    let menu = "Menú de opciones:\n";
-    menu += "1. Agregar gasto\n";
-    menu += "2. Ver lista de gastos\n";
-    menu += "3. Filtrar por descripción\n";
-    menu += "4. Buscar por palabra clave\n";
-    menu += "5. Salir";
-    return menu;
-}
+const agregarGastos=()=> {
+    let tipo = document.querySelector("#tipoGastos").value;
+    let cantidad = parseInt(document.querySelector("#cantidadGastos").value);
 
-// Array para almacenar los gastos
-let gastos = [];
-
-// Función para agregar un gasto
-function agregarGasto() {
-    let descripcion = prompt("Ingrese la descripción del gasto:");
-    let valor = parseFloat(prompt("Ingrese el valor del gasto:"));
-
-    if (!isNaN(valor)) {
-        gastos.push({ descripcion, valor });
-        alert("Gasto agregado exitosamente.");
-    } else {
-        alert("El valor del gasto debe ser un número válido.");
+    if (cantidad<1 || isNaN(cantidad) || tipo.trim()=== '') {
+        mostrarError("#msj_error_crearGastos", "ERROR EN CAMPOS");
+        return;
     }
-}
-
-// Función para ver la lista de gastos
-function verListaGastos() {
-    let lista = "Lista de gastos:\n";
-    let total = 0;
-    for (let gasto of gastos) {
-        lista += `- Descripción: ${gasto.descripcion}, Valor: ${gasto.valor.toFixed(2)}\n`;
-        total += gasto.valor;
+    if (cantidad > restante) {
+        mostrarError("#msj_error_crearGastos", "CANTIDAD MAYOR AL PRESUPUESTO");
+        return;
     }
-    lista += `Total de gastos: ${total.toFixed(2)}`;
-    alert(lista);
-}
-
-// Función para filtrar gastos por descripción
-function filtrarPorDescripcion() {
-    let filtro = prompt("Ingrese la descripción para filtrar los gastos:");
-    let gastosFiltrados = gastos.filter(gasto => gasto.descripcion.toLowerCase().includes(filtro.toLowerCase()));
-
-    if (gastosFiltrados.length === 0) {
-        alert("No se encontraron gastos que coincidan con la descripción proporcionada.");
-    } else {
-        let listaFiltrada = "Gastos que coinciden con la descripción '" + filtro + "':\n";
-        for (let gasto of gastosFiltrados) {
-            listaFiltrada += `- Descripción: ${gasto.descripcion}, Valor: ${gasto.valor.toFixed(2)}\n`;
-        }
-        alert(listaFiltrada);
+    let nuevoGastos = {
+        tipo,
+        cantidad
     }
+
+    let gastos = JSON.parse(localStorage.getItem("gastos"));
+    gastos.push(nuevoGastos);
+    localStorage.setItem("gastos", JSON.stringify(gastos));
+    refrescarListado();
+    document.querySelector("#formGastos").reset();
 }
 
-// Función para buscar gastos por palabra clave
-function buscarPorPalabraClave() {
-    let keyword = prompt("Ingrese una palabra clave para buscar en la descripción de los gastos:");
-    let resultados = gastos.filter(gasto => gasto.descripcion.toLowerCase().includes(keyword.toLowerCase()));
+const refrescarListado=()=> {
+    let presupuesto = localStorage.getItem("presupuesto");
+    let gastos = JSON.parse(localStorage.getItem("gastos"));
 
-    if (resultados.length === 0) {
-        alert("No se encontraron gastos que contengan la palabra clave '" + keyword + "'.");
-    } else {
-        let listaResultados = "Gastos que contienen la palabra clave '" + keyword + "':\n";
-        for (let gasto of resultados) {
-            listaResultados += `- Descripción: ${gasto.descripcion}, Valor: ${gasto.valor.toFixed(2)}\n`;
-        }
-        alert(listaResultados);
-    }
+    let totalGastos = 0 ;
+    let listadoHtml = ``;
+    gastos.map(gastos=>{
+            listadoHtml+=`<li class="gastos">
+                            <p> ${gastos.tipo}
+                            <span class="gastos">$ ${gastos.cantidad}</span>
+                            </p>
+                            </li>`;
+
+            totalGastos+=parseInt(gastos.cantidad);
+    });
+console.log ("Total de gastos: "+totalGastos);
+
+
+restante = presupuesto-totalGastos;
+let divControlGastos=document.querySelector("#divControlGastos");
+divControlGastos.innerHTML='';
+
+if((presupuesto/4)>restante){
+    clase="alert alert-danger";
+} else if ((presupuesto/2)>restante){
+    clase="alert alert-warning";
+}else {
+    clase="alert alert-success";
 }
 
-// Función principal para iniciar el gestor de gastos
-function iniciarGestorGastos() {
-    let nombreUsuario = obtenerNombreUsuario();
-    alert("¡Bienvenido, " + nombreUsuario + "!" + " A continuacion aparecera el menu para navegar en el gestor de gastos");
-
-    while (true) {
-        let opcion = prompt(mostrarMenu());
-        switch (opcion) {
-            case "1":
-                agregarGasto();
-                break;
-            case "2":
-                verListaGastos();
-                break;
-            case "3":
-                filtrarPorDescripcion();
-                break;
-            case "4":
-                buscarPorPalabraClave();
-                break;
-            case "5":
-                alert("Gracias por utilizar el Gestor de Gastos.");
-                return;
-            default:
-                alert("Opción no válida. Por favor, seleccione una opción del menú.");
-        }
-    }
+divControlGastos.innerHTML=`<div class="gastos-realizados>
+                                <h2>Listado de Gastos</h2>
+                                ${listadoHtml}
+                                <div class="alert alert-primary">              
+                                presupuesto: $ ${presupuesto}</div> 
+                                <div class="${clase}">
+                                restante: $ ${restante} </div>
+                                
+                                <button
+                                onclick="reiniciarPresupuesto()"
+                                class="button u-full-width">Reiniciar Presupuesto</button>
+                            </div>
+`;
 }
 
-iniciarGestorGastos();
+const reiniciarPresupuesto=()=>{
+    localStorage.clear();
+    location.reload(true);
+}
+
+
+
+
+const mostrarError = (elemento, mensaje) => {
+    divError = document.querySelector(elemento);
+    divError.innerHTML = `<p class="alert alert-danger error">${mensaje}</p>`;
+    setTimeout(() => { divError.innerHTML = ''; }, 2000);
+}
+
+
+
